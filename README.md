@@ -16,3 +16,5 @@ vom FTP herunterlade.
 Die unterschiedlichen Datenformate wandle ich dann maschinenlesbar um und führe alle Daten zusammen.
 
 Alle Funktionen sind der Übersicht halber in der 0_funktionen.py ausgelagert.
+
+Ein paar Data Preperation-Ansätze habe ich noch mit reingepackt.
