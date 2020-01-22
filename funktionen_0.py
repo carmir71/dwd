@@ -1,8 +1,3 @@
-# Fallstudie Webcrawler-gestütztes (Preis-)Abschriftenmanagement im stationären Einzelhandel
-# Carsten Mirgeler, Erim Kansoy und Petermax Fricke
-# Hochschule der Medien Stuttgart
-# Seminar: Web and Social Media Analytics
-
 # Benötigte Module laden
 ## Übliche Module
 import datetime as dt
@@ -53,14 +48,17 @@ def save_csv(quelle, name):
 def Beschreibung_Stationen1():
     file = 'KL_Tageswerte_Beschreibung_Stationen.txt'
     
-    ftp = FTP('ftp-cdc.dwd.de')
+    if os.path.isdir('backlog') == False:
+        os.mkdir('backlog')
+    
+    ftp = FTP('opendata.dwd.de')
     ftp.login()
-    ftp.cwd('pub/CDC/observations_germany/climate/daily/kl/recent/')
+    ftp.cwd('climate_environment/CDC/observations_germany/climate/daily/kl/recent/')
     
     list1 = ftp.nlst()
     
     if file in list1:
-        ftp.retrbinary('RETR ' + file, open('rückblick/' + file, 'wb').write)
+        ftp.retrbinary('RETR ' + file, open('backlog/' + file, 'wb').write)
         print('Beschreibung der Stationen vom FTP heruntergeladen und abgelegt')
     else:
         print('Beschreibung der Stationen vom FTP nicht verfügbar')
@@ -71,14 +69,14 @@ def Beschreibung_Stationen1():
 def Beschreibung_Stationen2():
     file = 'KL_Standardformate_Beschreibung_Stationen.txt'
     
-    ftp = FTP('ftp-cdc.dwd.de')
+    ftp = FTP('opendata.dwd.de')
     ftp.login()
-    ftp.cwd('pub/CDC/observations_germany/climate/subdaily/standard_format/')
+    ftp.cwd('climate_environment/CDC/observations_germany/climate/subdaily/standard_format/')
     
     list1 = ftp.nlst()
     
     if file in list1:
-        ftp.retrbinary('RETR ' + file, open('rückblick/' + file, 'wb').write)
+        ftp.retrbinary('RETR ' + file, open('backlog/' + file, 'wb').write)
         print('Beschreibung der Stationen vom FTP heruntergeladen und abgelegt')
     else:
         print('Beschreibung der Stationen vom FTP nicht verfügbar')
@@ -91,7 +89,7 @@ def Stationen_importieren1(von_datum):
     
     file = 'KL_Tageswerte_Beschreibung_Stationen.txt'
     
-    with open('rückblick/' + file, 'r', encoding='iso-8859-1') as f:
+    with open('backlog/' + file, 'r', encoding='iso-8859-1') as f:
         imp = f.read()
         
     imp = str(imp).split('\n')
@@ -120,7 +118,7 @@ def Stationen_importieren1(von_datum):
     
     # Zeilen-Bereinigung beim Import
     df = df.drop([0]) # Erste Zeile (Trennzeichen) löschen
-    df = df.drop([1180]) # Letzte Zeile (Leerzeile) löschen
+    df = df[:-1] # Letzte Zeile (Leerzeile) löschen
     
     # Datum umwandeln
     df['von_datum2'] = pd.to_datetime(df['von_datum'], format='%Y%m%d')
@@ -139,7 +137,7 @@ def Stationen_importieren1(von_datum):
     
     print('Beschreibung der Stationen vom FTP importiert')
 
-    return df 
+    return df
 
 
 def Stationen_importieren2(von_datum):
@@ -147,7 +145,7 @@ def Stationen_importieren2(von_datum):
     
     file = 'KL_Standardformate_Beschreibung_Stationen.txt'
     
-    with open('rückblick/' + file, 'r', encoding='iso-8859-1') as f:
+    with open('backlog/' + file, 'r', encoding='iso-8859-1') as f:
         imp = f.read()
         
     imp = str(imp).split('\n')
@@ -194,14 +192,14 @@ def Tageswerte_downloaden(stations_ids):
     list1, list2, list3, list4 = [], [], [], []
     
     d0 = dt.date.today()
-    pfad = 'rückblick/' + str(d0)
+    pfad = 'backlog/' + str(d0)
     os.makedirs(pfad, exist_ok=True)
     
     # Verbindung aufbauen
     
-    ftp = FTP('ftp-cdc.dwd.de')
+    ftp = FTP('opendata.dwd.de')
     ftp.login()
-    ftp.cwd('pub/CDC/observations_germany/climate/daily/kl/recent/')
+    ftp.cwd('climate_environment/CDC/observations_germany/climate/daily/kl/recent/')
     
     # Verzeichnis auslesen
     list1 = ftp.nlst()
@@ -218,9 +216,9 @@ def Tageswerte_downloaden(stations_ids):
     
     # Verbindung trennen und neu aufbauen
     
-    ftp = FTP('ftp-cdc.dwd.de')
+    ftp = FTP('opendata.dwd.de')
     ftp.login()
-    ftp.cwd('pub/CDC/observations_germany/climate/subdaily/standard_format/')
+    ftp.cwd('climate_environment/CDC/observations_germany/climate/subdaily/standard_format/')
     
     #Verzeichnis auslesen
     list2 = ftp.nlst()
@@ -243,8 +241,8 @@ def Tageswerte_downloaden(stations_ids):
 
 
 def Tageswerte_entpacken(datum):    
-    pfad = 'rückblick/' + datum
-    pfad_entpackt = 'rückblick/' + datum + '/entpackt'
+    pfad = 'backlog/' + datum
+    pfad_entpackt = 'backlog/' + datum + '/entpackt'
 
     if os.path.isdir(pfad_entpackt) == False:
         os.mkdir(pfad_entpackt)
@@ -276,7 +274,7 @@ def Tageswerte_importieren1(datum, ab_datum, ausgabe):
     dataframe_temp = pd.DataFrame()
     dataframe = pd.DataFrame()
     
-    pfad_entpackt = 'rückblick/' + datum + '/entpackt'
+    pfad_entpackt = 'backlog/' + datum + '/entpackt'
     
     for file in os.listdir(pfad_entpackt):
         if file.startswith('produkt_klima_tag_') and file.endswith('.txt'):
@@ -338,7 +336,7 @@ def Tageswerte_importieren2(datum, ab_datum, ausgabe):
     dataframe_temp = pd.DataFrame()
     dataframe = pd.DataFrame()
     
-    pfad_entpackt = 'rückblick/' + datum + '/entpackt'
+    pfad_entpackt = 'backlog/' + datum + '/entpackt'
     
     for file in os.listdir(pfad_entpackt):
         if file.startswith('kl_') and file.endswith('_00_akt.txt'):
@@ -443,7 +441,7 @@ def Tageswerte_zusammenlegen(subdaily, daily):
 
 def Stationsdaten_loeschen(dataframe, days):
     filelist = []
-    pfad = 'rückblick/'
+    pfad = 'backlog/'
     
     last_days = dataframe['bis_datum'].max() - dt.timedelta(days)
 
@@ -628,4 +626,25 @@ def rest_fehlwerte_ersetzen(dataframe):
     df_temp = df_temp.replace(np.NaN, 0)
     
     return df_temp
+
+def Plausi_Voll(dataframe):
+    # Funktionen
+    madate = max(dataframe['MESS_DATUM'])
+    midate = min(dataframe['MESS_DATUM'])
+    dedate = int(str(madate - midate).replace(' days 00:00:00', '')) + 1
+    anzahl_stat = len(dataframe['STATIONS_ID'].unique())
+    anzahl_dsatz = len(dataframe)
+    anzahl_dsoll = anzahl_stat * dedate
+    anzahl_dfehl = anzahl_dsoll - anzahl_dsatz
+    
+    # Ausdruck
+    print('Mindestdatum: ', midate)
+    print('Höchstdatum: ', madate)
+    print('Anzahl Tage: ', dedate)
+    print('Anzahl Stationen IST: ', anzahl_stat)
+    print('Anzahl Datensätze IST: ', anzahl_dsatz)
+    print('Anzahl Datensätze SOLL: ', anzahl_dsoll)
+    print('Anzahl fehlender Datensätze: ', anzahl_dfehl)
+
+    return
 
