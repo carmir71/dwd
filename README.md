@@ -18,3 +18,5 @@ Die unterschiedlichen Datenformate wandle ich dann maschinenlesbar um und führe
 Alle Funktionen sind der Übersicht halber in der 0_funktionen.py ausgelagert.
 
 Ein paar Data Preperation-Ansätze habe ich noch mit reingepackt.
+
+Update am 20.01.2020: Anpassung der FTP-Verbindungsdaten des DWD
